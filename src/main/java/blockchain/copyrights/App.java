@@ -34,19 +34,23 @@ public class App {
 
         loginComponent();
 
+        MAIN_WINDOW.setContentPane(MAIN_CONTAINER);
+
     }
 
     private void loginComponent() {
+        // Layout
+        GridLayout login_layout = new GridLayout(3, 0);
         // Account location
-        /*JPanel account = new JPanel();
+        JPanel account = new JPanel();
         JLabel account_label = new JLabel("Account location :");
-        JTextArea account_text = new JTextArea();
+        JTextField account_text = new JTextField(10);
         account.add(account_label);
         account.add(account_text);
         // Password
         JPanel password = new JPanel();
         JLabel password_label = new JLabel("Password :");
-        JTextArea password_text = new JTextArea();
+        JTextField password_text = new JTextField(10);
         password.add(password_label);
         password.add(password_text);
         // Button
@@ -56,25 +60,18 @@ public class App {
         // Login
         JPanel login_pane = new JPanel();
         login_pane.setBackground(Color.BLUE);
+        login_pane.setLayout(login_layout);
         login_pane.add(account, BorderLayout.NORTH);
         login_pane.add(password, BorderLayout.CENTER);
         login_pane.add(login_button, BorderLayout.SOUTH);
-        MAIN_CONTAINER.add(login_pane);*/
-
-        JPanel account = new JPanel();
-        JLabel account_label = new JLabel("Account location :");
-        JTextArea account_text = new JTextArea();
-        account.add(account_label);
-        account.add(account_text);
-        MAIN_CONTAINER.add(account, BorderLayout.CENTER);
-
+        MAIN_CONTAINER.add(login_pane);
     }
 
     class LoginListener implements ActionListener {
-        private JTextArea LOCATION;
-        private JTextArea PWD;
+        private JTextField LOCATION;
+        private JTextField PWD;
 
-        public LoginListener(JTextArea location, JTextArea pwd) {
+        public LoginListener(JTextField location, JTextField pwd) {
             LOCATION = location;
             PWD = pwd;
         }
@@ -85,10 +82,6 @@ public class App {
                 IS_LOGGED = true;
             } catch (IOException | CipherException ex) {
                 ex.printStackTrace();
-            }
-            if (IS_LOGGED) {
-                System.out.println(PWD.getText());
-                System.out.println(LOCATION.getText());
             }
         }
     }
