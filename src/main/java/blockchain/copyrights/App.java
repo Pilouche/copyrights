@@ -10,10 +10,11 @@ import java.io.IOException;
 
 public class App {
 
-    public static void main(String[] args) {
+	private static String pwd = "test";
+    private static String LOCATION_ACCOUNT = "test";
 
-        String pwd = "test";
-        String LOCATION_ACCOUNT = "test";
+    public static void main(String[] args) {
+    	
         Web3j web3 = Web3j.build(new HttpService());
 
         Credentials credentialsWallet = null;
