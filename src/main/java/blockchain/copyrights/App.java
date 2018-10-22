@@ -21,6 +21,7 @@ public class App {
     private static boolean IS_LOGGED = false;
 
     public App() {
+
         WEB3 = Web3j.build(new HttpService());
 
         MAIN_WINDOW = new Window("Artwork Copyrights Manager", 1000, 1000);
