@@ -47,5 +47,6 @@ pragma solidity ^0.4.25;
     	
     	function buyCopy(uint artworkID) public payable {
     		require(msg.value == artworks[artworkID].fare);
+    		
     	}
 	}
