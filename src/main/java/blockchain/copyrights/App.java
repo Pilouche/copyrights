@@ -43,7 +43,6 @@ public class App implements ItemListener {
 
     private void refreshContainer() {
         MAIN_WINDOW.setContentPane(MAIN_CONTAINER);
-        // MAIN_WINDOW.repaint();
     }
 
     private void resetContainer() {
@@ -70,13 +69,13 @@ public class App implements ItemListener {
         JLabel top_text = new JLabel(text);
         JPanel top_pane = new JPanel();
         top_pane.setPreferredSize(new Dimension(MAIN_WINDOW.getWidth(), 50));
+        top_pane.add(top_text);
         if (IS_LOGGED) {
             JButton deco_button = new JButton("Log out");
             deco_button.addActionListener(new DecoListener());
-            top_pane.add(deco_button);
+            top_pane.add(deco_button, BorderLayout.EAST);
         }
-        top_pane.add(top_text);
-        MAIN_CONTAINER.add(top_pane, BorderLayout.NORTH);
+        MAIN_CONTAINER.add(top_pane);
     }
 
     private void setMainGUI() {
@@ -103,22 +102,12 @@ public class App implements ItemListener {
     }
 
     private void setProducteurView(String name) {
-        JPanel panel = new JPanel();
-
-        JLabel labelTest = new JLabel(name);
-        panel.add(labelTest);
-        // GUI code here
-
+        Producteur panel = new Producteur(WEB3, WALLET, MAIN_WINDOW.getWidth(), MAIN_WINDOW.getHeight());
         MAIN_GUI.add(panel, name);
     }
 
     private void setArtisteView(String name) {
-        JPanel panel = new JPanel();
-
-        JLabel labelTest = new JLabel(name);
-        panel.add(labelTest);
-        // GUI code here
-
+        Artiste panel = new Artiste(WEB3, WALLET, MAIN_WINDOW.getWidth(), MAIN_WINDOW.getHeight());
         MAIN_GUI.add(panel, name);
     }
 
@@ -208,9 +197,9 @@ public class App implements ItemListener {
         JPanel login_pane = new JPanel();
         login_pane.setBackground(Color.BLUE);
         login_pane.setLayout(login_layout);
-        login_pane.add(account, BorderLayout.NORTH);
-        login_pane.add(password, BorderLayout.CENTER);
-        login_pane.add(login_button, BorderLayout.SOUTH);
+        login_pane.add(account);
+        login_pane.add(password);
+        login_pane.add(login_button);
         MAIN_CONTAINER.add(login_pane);
     }
 }
