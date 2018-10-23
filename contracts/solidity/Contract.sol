@@ -38,7 +38,7 @@ pragma solidity ^0.4.25;
     	}
     	
     	uint numArtworks;
-    	mapping (uint => Artwork) public artworks;
+    	mapping (uint => Artwork) artworks;
     	
     	function newArtwork(string name, string category, address artistAddr, address producerAddr, 
     		uint worth, uint fare) public returns (uint artworkID) {
@@ -55,7 +55,7 @@ pragma solidity ^0.4.25;
     	function privateInvestment(uint artworkID) public payable {
     	    require(msg.value > 0);
     		artworks[artworkID].artist.addr.transfer(msg.value);
-    	    if(!artworks[artworkID].Clients[msg.sender].exists)  {
+    	    if(!artworks[artworkID].Investors[msg.sender].exists)  {
     		    artworks[artworkID].Investors[msg.sender] = Investor(msg.sender, msg.value, true);
     	    } else {
     	        artworks[artworkID].Investors[msg.sender].investedAmount += msg.value;
@@ -76,5 +76,12 @@ pragma solidity ^0.4.25;
     	function payShares() {
     	    
     	}
+    	
+    	function getArtwork(uint index) public constant returns(string, string, address, address, uint, uint, uint) {
+            return (artworks[index].name, artworks[index].category, 
+                artworks[index].artist.addr,
+                artworks[index].producer.addr, artworks[index].producer.investedAmount,
+                artworks[index].worth, artworks[index].fare);
+        }
     	
 	}
