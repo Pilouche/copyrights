@@ -9,10 +9,12 @@ pragma solidity ^0.4.25;
 		struct Investor {
 			address addr;
         	uint investedAmount;
+        	bool exists;
 		}
 		
 		struct Client {
 			address addr;
+			bool exists;
 		}
 		
 		struct Artist {
@@ -30,20 +32,18 @@ pragma solidity ^0.4.25;
 			Artist artist;
 			Producer producer;
         	uint worth;
-        	uint numInvestors;
-        	uint numClients;
         	uint fare;
         	mapping (address => Investor) Investors;
         	mapping (address => Client) Clients;
     	}
     	
-    	uint numArtworks;
+    	uint public numArtworks;
     	mapping (uint => Artwork) artworks;
     	
     	function newArtwork(string name, string category, address artistAddr, address producerAddr, 
     		uint worth, uint fare) public returns (uint artworkID) {
         	artworkID = numArtworks++;
-        	artworks[artworkID] = Artwork(name, category, Artist(artistAddr), Producer(producerAddr, 0), worth, 0, 0, fare);
+        	artworks[artworkID] = Artwork(name, category, Artist(artistAddr), Producer(producerAddr, 0), worth, fare);
     	}
     	
     	function productionInvestment(uint artworkID) public payable {
@@ -55,15 +55,18 @@ pragma solidity ^0.4.25;
     	function privateInvestment(uint artworkID) public payable {
     	    require(msg.value > 0);
     		artworks[artworkID].artist.addr.transfer(msg.value);
-    		artworks[artworkID].numInvestors++;
-    		artworks[artworkID].Investors[msg.sender] = Investor(msg.sender, msg.value);
+    	    if(!artworks[artworkID].Clients[msg.sender].exists)  {
+    		    artworks[artworkID].Investors[msg.sender] = Investor(msg.sender, msg.value, true);
+    	    } else {
+    	        artworks[artworkID].Investors[msg.sender].investedAmount += msg.value;
+    	    }
     	}
     	
     	function buyCopy(uint artworkID) public payable {
+    	    if(artworks[artworkID].Clients[msg.sender].exists) throw;
     		require(msg.value == artworks[artworkID].fare);
     		artworks[artworkID].producer.addr.transfer(msg.value);
-    		artworks[artworkID].numClients++;
-    		artworks[artworkID].Clients[msg.sender] = Client(msg.sender);
+    		artworks[artworkID].Clients[msg.sender] = Client(msg.sender, true);
     	}
     	
     	function sellRights(uint artworkID, address producerAddr) public payable {
@@ -73,4 +76,5 @@ pragma solidity ^0.4.25;
     	function payShares() {
     	    
     	}
+    	
 	}
