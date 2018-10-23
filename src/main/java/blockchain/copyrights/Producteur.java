@@ -38,8 +38,16 @@ public class Producteur extends JPanel {
     private JPanel newProjectView() {
         JPanel panel = new JPanel();
 
-        JLabel label = new JLabel("New project view");
-        panel.add(label);
+        GridLayout grid = new GridLayout(2,2);
+        panel.setLayout(grid);
+        JLabel l1 = new JLabel("1");
+        panel.add(l1, BorderLayout.CENTER);
+        JLabel l2 = new JLabel("2");
+        panel.add(l2, BorderLayout.CENTER);
+        JLabel l3 = new JLabel("3");
+        panel.add(l3, BorderLayout.CENTER);
+        JLabel l4 = new JLabel("4");
+        panel.add(l4, BorderLayout.CENTER);
 
         panel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         return panel;
