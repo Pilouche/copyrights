@@ -37,8 +37,8 @@ pragma solidity ^0.4.25;
         	mapping (address => Client) Clients;
     	}
     	
-    	uint public numArtworks;
-    	mapping (uint => Artwork) artworks;
+    	uint numArtworks;
+    	mapping (uint => Artwork) public artworks;
     	
     	function newArtwork(string name, string category, address artistAddr, address producerAddr, 
     		uint worth, uint fare) public returns (uint artworkID) {
