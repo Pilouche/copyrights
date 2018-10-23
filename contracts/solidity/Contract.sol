@@ -19,10 +19,12 @@ pragma solidity ^0.4.25;
 		
 		struct Artist {
 			address addr;	
+			string name;
 		}
 		
 		struct Producer {
 			address addr;
+			string name;
         	uint investedAmount;
 		}
 		
@@ -40,10 +42,10 @@ pragma solidity ^0.4.25;
     	uint numArtworks;
     	mapping (uint => Artwork) artworks;
     	
-    	function newArtwork(string name, string category, address artistAddr, address producerAddr, 
-    		uint worth, uint fare) public returns (uint artworkID) {
+    	function newArtwork(string name, string category, address artistAddr, string artistName, address producerAddr,
+    	    string producerName, uint worth, uint fare) public returns (uint artworkID) {
         	artworkID = numArtworks++;
-        	artworks[artworkID] = Artwork(name, category, Artist(artistAddr), Producer(producerAddr, 0), worth, fare);
+        	artworks[artworkID] = Artwork(name, category, Artist(artistAddr, artistName), Producer(producerAddr, producerName, 0), worth, fare);
     	}
     	
     	function productionInvestment(uint artworkID) public payable {
@@ -77,11 +79,16 @@ pragma solidity ^0.4.25;
     	    
     	}
     	
-    	function getArtwork(uint index) public constant returns(string, string, address, address, uint, uint, uint) {
-            return (artworks[index].name, artworks[index].category, 
-                artworks[index].artist.addr,
-                artworks[index].producer.addr, artworks[index].producer.investedAmount,
-                artworks[index].worth, artworks[index].fare);
+    	function getArtworksCount() public view returns(uint) {
+            return numArtworks;
+        }
+    	
+    	function getArtwork(uint index) public view returns(string, string, address, string, address, string, uint, uint, uint) {
+    	    Artwork artwork = artworks[index];
+            return (artwork.name, artwork.category, 
+                artwork.artist.addr, artwork.artist.name,
+                artwork.producer.addr, artwork.producer.name, artwork.producer.investedAmount,
+                artwork.worth, artwork.fare);
         }
     	
 	}
