@@ -4,16 +4,23 @@ import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.utils.Convert;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.IOException;
+import java.math.BigDecimal;
 
-public class App {
+public class App implements ItemListener {
 
+    private static JPanel MAIN_GUI;
     private static Web3j WEB3;
     private static Window MAIN_WINDOW;
     private static Container MAIN_CONTAINER;
@@ -27,18 +34,158 @@ public class App {
         MAIN_WINDOW = new Window("Artwork Copyrights Manager", 1000, 1000);
         MAIN_CONTAINER = MAIN_WINDOW.getContentPane();
 
-        JPanel top_bar = new JPanel();
-        top_bar.setBackground(Color.GREEN);
-        top_bar.setPreferredSize(new Dimension(MAIN_WINDOW.getWidth(), 100));
-        MAIN_CONTAINER.add(top_bar, BorderLayout.NORTH);
-
-        loginComponent();
-
-        MAIN_WINDOW.setContentPane(MAIN_CONTAINER);
+        resetContainer();
+        setTopBar();
+        setLoginComponent();
+        refreshContainer();
 
     }
 
-    private void loginComponent() {
+    private void refreshContainer() {
+        MAIN_WINDOW.setContentPane(MAIN_CONTAINER);
+        // MAIN_WINDOW.repaint();
+    }
+
+    private void resetContainer() {
+        MAIN_CONTAINER.removeAll();
+    }
+
+    private void setTopBar() {
+        String text;
+        if (IS_LOGGED) {
+            text = "Balance : 1750 ETH";
+        } else {
+            text = "Connection";
+        }
+        if (WALLET != null) {
+            String address = WALLET.getAddress();
+            try {
+                EthGetBalance ethGetBalance = WEB3.ethGetBalance(address, DefaultBlockParameterName.LATEST).sendAsync().get();
+                BigDecimal balance = Convert.fromWei(ethGetBalance.getBalance().toString(), Convert.Unit.ETHER);
+                text = "Balance : " + balance + " ETH";
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        JLabel top_text = new JLabel(text);
+        JPanel top_pane = new JPanel();
+        top_pane.setPreferredSize(new Dimension(MAIN_WINDOW.getWidth(), 50));
+        if (IS_LOGGED) {
+            JButton deco_button = new JButton("Log out");
+            deco_button.addActionListener(new DecoListener());
+            top_pane.add(deco_button);
+        }
+        top_pane.add(top_text);
+        MAIN_CONTAINER.add(top_pane, BorderLayout.NORTH);
+    }
+
+    private void setMainGUI() {
+        MAIN_GUI = new JPanel(new CardLayout());
+
+        String producteurPanel = "Producteur";
+        String artistePanel = "Artiste";
+        String investisseurPanel = "Investisseur";
+        String clientPanel = "Client";
+        String comboBoxItems[] = { producteurPanel, artistePanel, investisseurPanel, clientPanel };
+        JPanel comboBoxPane = new JPanel();
+        JComboBox cb = new JComboBox(comboBoxItems);
+        cb.setEditable(false);
+        cb.addItemListener(this);
+        comboBoxPane.add(cb);
+
+        setProducteurView(producteurPanel);
+        setArtisteView(artistePanel);
+        setInvestisseurView(investisseurPanel);
+        setClientView(clientPanel);
+
+        MAIN_CONTAINER.add(comboBoxPane, BorderLayout.PAGE_START);
+        MAIN_CONTAINER.add(MAIN_GUI, BorderLayout.CENTER);
+    }
+
+    private void setProducteurView(String name) {
+        JPanel panel = new JPanel();
+
+        JLabel labelTest = new JLabel(name);
+        panel.add(labelTest);
+        // GUI code here
+
+        MAIN_GUI.add(panel, name);
+    }
+
+    private void setArtisteView(String name) {
+        JPanel panel = new JPanel();
+
+        JLabel labelTest = new JLabel(name);
+        panel.add(labelTest);
+        // GUI code here
+
+        MAIN_GUI.add(panel, name);
+    }
+
+    private void setInvestisseurView(String name) {
+        JPanel panel = new JPanel();
+
+        JLabel labelTest = new JLabel(name);
+        panel.add(labelTest);
+        // GUI code here
+
+        MAIN_GUI.add(panel, name);
+    }
+
+    private void setClientView(String name) {
+        JPanel panel = new JPanel();
+
+        JLabel labelTest = new JLabel(name);
+        panel.add(labelTest);
+        // GUI code here
+
+        MAIN_GUI.add(panel, name);
+    }
+
+    public void itemStateChanged(ItemEvent evt) {
+        CardLayout cl = (CardLayout)(MAIN_GUI.getLayout());
+        cl.show(MAIN_GUI, (String)evt.getItem());
+    }
+
+    class DecoListener implements ActionListener {
+        public DecoListener() {}
+
+        public void actionPerformed(ActionEvent e) {
+            IS_LOGGED = false;
+            resetContainer();
+            setTopBar();
+            setLoginComponent();
+            refreshContainer();
+        }
+    }
+
+    class LoginListener implements ActionListener {
+        private JTextField LOCATION;
+        private JTextField PWD;
+
+        public LoginListener(JTextField location, JTextField pwd) {
+            LOCATION = location;
+            PWD = pwd;
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            IS_LOGGED = true;
+            /*try {
+                WALLET = WalletUtils.loadCredentials(PWD.getText(), LOCATION.getText());
+                IS_LOGGED = true;
+            } catch (IOException | CipherException ex) {
+                ex.printStackTrace();
+            }*/
+            if (IS_LOGGED) {
+                resetContainer();
+                setTopBar();
+                setMainGUI();
+                refreshContainer();
+            }
+        }
+    }
+
+    private void setLoginComponent() {
         // Layout
         GridLayout login_layout = new GridLayout(3, 0);
         // Account location
@@ -65,24 +212,5 @@ public class App {
         login_pane.add(password, BorderLayout.CENTER);
         login_pane.add(login_button, BorderLayout.SOUTH);
         MAIN_CONTAINER.add(login_pane);
-    }
-
-    class LoginListener implements ActionListener {
-        private JTextField LOCATION;
-        private JTextField PWD;
-
-        public LoginListener(JTextField location, JTextField pwd) {
-            LOCATION = location;
-            PWD = pwd;
-        }
-
-        public void actionPerformed(ActionEvent e) {
-            try {
-                WALLET = WalletUtils.loadCredentials(PWD.getText(), LOCATION.getText());
-                IS_LOGGED = true;
-            } catch (IOException | CipherException ex) {
-                ex.printStackTrace();
-            }
-        }
     }
 }
