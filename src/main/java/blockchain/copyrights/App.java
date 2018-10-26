@@ -7,6 +7,7 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Convert;
 
 import javax.swing.*;
@@ -17,14 +18,17 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public class App implements ItemListener {
 
     private static JPanel MAIN_GUI;
-    private static Web3j WEB3;
+    public static Web3j WEB3;
     private static Window MAIN_WINDOW;
     private static Container MAIN_CONTAINER;
-    private static Credentials WALLET = null;
+    public static Credentials WALLET = null;
+    public static Copyrights BLOCKCHAIN = null;
+    private static String BLOCKCHAIN_ADDRESS;
     private static boolean IS_LOGGED = false;
 
     public App() {
@@ -52,7 +56,7 @@ public class App implements ItemListener {
     private void setTopBar() {
         String text;
         if (IS_LOGGED) {
-            text = "Balance : 1750 ETH";
+            text = "Error: could not get balance. Please logout and reconnect.";
         } else {
             text = "Connection";
         }
@@ -102,7 +106,7 @@ public class App implements ItemListener {
     }
 
     private void setProducteurView(String name) {
-        Producteur panel = new Producteur(WEB3, WALLET, MAIN_WINDOW.getWidth(), MAIN_WINDOW.getHeight());
+        Producteur panel = new Producteur(MAIN_WINDOW.getWidth(), MAIN_WINDOW.getHeight());
         MAIN_GUI.add(panel, name);
     }
 
@@ -141,6 +145,7 @@ public class App implements ItemListener {
 
         public void actionPerformed(ActionEvent e) {
             IS_LOGGED = false;
+            WALLET = null;
             resetContainer();
             setTopBar();
             setLoginComponent();
@@ -150,22 +155,37 @@ public class App implements ItemListener {
 
     class LoginListener implements ActionListener {
         private JTextField LOCATION;
-        private JTextField PWD;
+        private JPasswordField PWD;
+        private JTextField ADDR;
 
-        public LoginListener(JTextField location, JTextField pwd) {
+        public LoginListener(JTextField location, JPasswordField pwd, JTextField addr) {
             LOCATION = location;
             PWD = pwd;
+            ADDR = addr;
         }
 
         public void actionPerformed(ActionEvent e) {
-            IS_LOGGED = true;
-            /*try {
-                WALLET = WalletUtils.loadCredentials(PWD.getText(), LOCATION.getText());
+            System.out.println("Logging in...");
+            // WALLET connexion
+            try {
+                WALLET = WalletUtils.loadCredentials(String.valueOf(PWD.getPassword()), LOCATION.getText());
+                System.out.println("Wallet is : "+WALLET);
                 IS_LOGGED = true;
             } catch (IOException | CipherException ex) {
                 ex.printStackTrace();
-            }*/
+            }
+            System.out.println("Catching blockchain...");
+            // BLOCKCHAIN initialization
+            try {
+                //BLOCKCHAIN = Copyrights.deploy(WEB3, WALLET, DefaultGasProvider.GAS_PRICE, DefaultGasProvider.GAS_LIMIT).send();
+                //System.out.println(BLOCKCHAIN.getContractAddress());
+                BLOCKCHAIN = Copyrights.load(ADDR.getText(), WEB3, WALLET, DefaultGasProvider.GAS_PRICE, DefaultGasProvider.GAS_LIMIT);
+                System.out.println("Got blockchain !");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
             if (IS_LOGGED) {
+                //createTestArtworks();
                 resetContainer();
                 setTopBar();
                 setMainGUI();
@@ -174,31 +194,57 @@ public class App implements ItemListener {
         }
     }
 
+    private void createTestArtworks() {
+        System.out.println("Creating artwork one...");
+        try {
+            BLOCKCHAIN.newArtwork("Requiem pour un fou","Song","0xe2e7873a04f16c41d1c416963c0d5da2a6e40ba6","Johnny Hallyday","0xe1771c0ca66f2372e31f396d794dcb1c4ec0b46d", "Augustin Gaillot", BigInteger.valueOf(1000000), BigInteger.valueOf(10)).send();
+            System.out.println("Artwork one done.");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        System.out.println("Creating artwork two...");
+        try {
+            BLOCKCHAIN.newArtwork("Rap God","Song","0xe2e7873a04f16c41d1c416963c0d5da2a6e40ba6","Eminem","0xe1771c0ca66f2372e31f396d794dcb1c4ec0b46d", "Augustin Gaillot", BigInteger.valueOf(2000), BigInteger.valueOf(1)).send();
+            System.out.println("Artwork two done.");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
     private void setLoginComponent() {
         // Layout
-        GridLayout login_layout = new GridLayout(3, 0);
+        GridLayout login_layout = new GridLayout(4, 0);
         // Account location
         JPanel account = new JPanel();
         JLabel account_label = new JLabel("Account location :");
         JTextField account_text = new JTextField(10);
+        account_text.setText("/home/augustin/.ethereum/sharedchainJag/keystore/UTC--2018-10-08T07-15-28.021916890Z--e1771c0ca66f2372e31f396d794dcb1c4ec0b46d");
         account.add(account_label);
         account.add(account_text);
         // Password
         JPanel password = new JPanel();
         JLabel password_label = new JLabel("Password :");
-        JTextField password_text = new JTextField(10);
+        JPasswordField password_text = new JPasswordField(10);
+        password_text.setEchoChar('*');
         password.add(password_label);
         password.add(password_text);
+        // Bloackchain address
+        JPanel address = new JPanel();
+        JLabel address_label = new JLabel("Blockchain address :");
+        JTextField address_text = new JTextField(10);
+        address_text.setText("0x6f935219eea15ebcd6db62e8edfb282e69791c48");
+        address.add(address_label);
+        address.add(address_text);
         // Button
         JButton login_button = new JButton("Login");
         login_button.setAlignmentX(Component.CENTER_ALIGNMENT);
-        login_button.addActionListener(new LoginListener(account_text, password_text));
+        login_button.addActionListener(new LoginListener(account_text, password_text, address_text));
         // Login
         JPanel login_pane = new JPanel();
-        login_pane.setBackground(Color.BLUE);
         login_pane.setLayout(login_layout);
         login_pane.add(account);
         login_pane.add(password);
+        login_pane.add(address);
         login_pane.add(login_button);
         MAIN_CONTAINER.add(login_pane);
     }

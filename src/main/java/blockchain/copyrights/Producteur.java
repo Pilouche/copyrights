@@ -1,21 +1,17 @@
 package blockchain.copyrights;
 
-import org.web3j.crypto.Credentials;
-import org.web3j.protocol.Web3j;
-
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.math.BigInteger;
 
 public class Producteur extends JPanel {
 
-    private static Web3j WEB3;
-    private static Credentials WALLET;
     private static int HEIGHT;
     private static int WIDTH;
 
-    public Producteur(Web3j web3, Credentials wallet, int height, int width) {
-        WEB3 = web3;
-        WALLET = wallet;
+    public Producteur(int height, int width) {
         HEIGHT = height;
         WIDTH = width;
         JTabbedPane tabbed_pane = new JTabbedPane();
@@ -30,9 +26,35 @@ public class Producteur extends JPanel {
 
         JLabel label = new JLabel("My projects view");
         panel.add(label);
+        JButton button = new JButton("Get blockchain");
+        button.addActionListener(new ProjectsListener());
+        panel.add(button);
 
         panel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         return panel;
+    }
+
+    class ProjectsListener implements ActionListener {
+        public ProjectsListener() {}
+
+        public void actionPerformed(ActionEvent e) {
+            int count = 0;
+            System.out.println("Getting artwork count...");
+            try {
+                count = App.BLOCKCHAIN.getArtworksCount().send().intValue();
+                System.out.println("Artwork count is "+count);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            for (int i = 0; i < count; i++) {
+                System.out.println("Getting artwork "+i);
+                try {
+                    System.out.println(App.BLOCKCHAIN.getArtwork(BigInteger.valueOf(i)).send());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
     }
 
     private JPanel newProjectView() {
@@ -40,14 +62,6 @@ public class Producteur extends JPanel {
 
         GridLayout grid = new GridLayout(2,2);
         panel.setLayout(grid);
-        JLabel l1 = new JLabel("1");
-        panel.add(l1, BorderLayout.CENTER);
-        JLabel l2 = new JLabel("2");
-        panel.add(l2, BorderLayout.CENTER);
-        JLabel l3 = new JLabel("3");
-        panel.add(l3, BorderLayout.CENTER);
-        JLabel l4 = new JLabel("4");
-        panel.add(l4, BorderLayout.CENTER);
 
         panel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         return panel;
