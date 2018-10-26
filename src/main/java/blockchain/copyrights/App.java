@@ -30,7 +30,7 @@ public class App implements ItemListener {
     private static Container MAIN_CONTAINER;
     public static Credentials WALLET = null;
     public static Copyrights BLOCKCHAIN = null;
-    private static String BLOCKCHAIN_ADDRESS;
+    public static String USERNAME;
     private static boolean IS_LOGGED = false;
 
     public App() {
@@ -98,7 +98,7 @@ public class App implements ItemListener {
             System.out.println("Getting artwork "+(i+1));
             try {
                 Tuple9 tuple = BLOCKCHAIN.getArtwork(BigInteger.valueOf(i)).send();
-                artworks.add(new Artwork(tuple.getValue1().toString(), tuple.getValue2().toString(), tuple.getValue3().toString(), tuple.getValue4().toString(), tuple.getValue5().toString(), tuple.getValue6().toString(), (BigInteger) tuple.getValue7(), (BigInteger) tuple.getValue8()));
+                artworks.add(new Artwork(tuple.getValue1().toString(), tuple.getValue2().toString(), tuple.getValue3().toString(), tuple.getValue4().toString(), tuple.getValue5().toString(), tuple.getValue6().toString(), (BigInteger) tuple.getValue7(), (BigInteger) tuple.getValue8(), (BigInteger) tuple.getValue9()));
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -170,6 +170,7 @@ public class App implements ItemListener {
         public void actionPerformed(ActionEvent e) {
             IS_LOGGED = false;
             WALLET = null;
+            BLOCKCHAIN = null;
             resetContainer();
             setTopBar();
             setLoginComponent();
@@ -182,7 +183,8 @@ public class App implements ItemListener {
         private JPasswordField PWD;
         private JTextField ADDR;
 
-        public LoginListener(JTextField location, JPasswordField pwd, JTextField addr) {
+        public LoginListener(JTextField name, JTextField location, JPasswordField pwd, JTextField addr) {
+            USERNAME = name.getText();
             LOCATION = location;
             PWD = pwd;
             ADDR = addr;
@@ -237,35 +239,43 @@ public class App implements ItemListener {
 
     private void setLoginComponent() {
         // Layout
-        GridLayout login_layout = new GridLayout(4, 0);
+        GridLayout login_layout = new GridLayout(5, 0);
+        // Username
+        JPanel name = new JPanel();
+        JLabel name_label = new JLabel("Name :");
+        JTextField name_text = new JTextField(20);
+        name_text.setText("Augustin Gaillot");
+        name.add(name_label);
+        name.add(name_text);
         // Account location
         JPanel account = new JPanel();
         JLabel account_label = new JLabel("Account location :");
-        JTextField account_text = new JTextField(10);
+        JTextField account_text = new JTextField(50);
         account_text.setText("/home/augustin/.ethereum/sharedchainJag/keystore/UTC--2018-10-08T07-15-28.021916890Z--e1771c0ca66f2372e31f396d794dcb1c4ec0b46d");
         account.add(account_label);
         account.add(account_text);
         // Password
         JPanel password = new JPanel();
         JLabel password_label = new JLabel("Password :");
-        JPasswordField password_text = new JPasswordField(10);
+        JPasswordField password_text = new JPasswordField(20);
         password_text.setEchoChar('*');
         password.add(password_label);
         password.add(password_text);
         // Bloackchain address
         JPanel address = new JPanel();
         JLabel address_label = new JLabel("Blockchain address :");
-        JTextField address_text = new JTextField(10);
+        JTextField address_text = new JTextField(20);
         address_text.setText("0x6f935219eea15ebcd6db62e8edfb282e69791c48");
         address.add(address_label);
         address.add(address_text);
         // Button
         JButton login_button = new JButton("Login");
         login_button.setAlignmentX(Component.CENTER_ALIGNMENT);
-        login_button.addActionListener(new LoginListener(account_text, password_text, address_text));
+        login_button.addActionListener(new LoginListener(name_text, account_text, password_text, address_text));
         // Login
         JPanel login_pane = new JPanel();
         login_pane.setLayout(login_layout);
+        login_pane.add(name);
         login_pane.add(account);
         login_pane.add(password);
         login_pane.add(address);

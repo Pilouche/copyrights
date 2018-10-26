@@ -10,6 +10,7 @@ public class Artwork {
     public String artist_name;
     public String producer_addr;
     public String producer_name;
+    public int producer_investment;
     public int worth;
     public int fare;
 
@@ -19,6 +20,7 @@ public class Artwork {
                    String artist_name,
                    String producer_addr,
                    String producer_name,
+                   BigInteger producer_investment,
                    BigInteger worth,
                    BigInteger fare) {
         this.name = name;
@@ -27,6 +29,7 @@ public class Artwork {
         this.artist_name = artist_name;
         this.producer_addr = producer_addr;
         this.producer_name = producer_name;
+        this.producer_investment = producer_investment.intValue();
         this.worth = worth.intValue();
         this.fare = fare.intValue();
     }
@@ -39,6 +42,7 @@ public class Artwork {
                 +", Artist name : "+artist_name
                 +", Producer address : "+producer_addr
                 +", Producer name : "+producer_name
+                +", Producer investment : "+producer_investment
                 +", Total worth : "+worth
                 +", Fare : "+fare;
         return s;
@@ -52,5 +56,18 @@ public class Artwork {
                 +", Total worth : "+worth
                 +", Fare : "+fare;
         return s;
+    }
+
+    public Object[] toArray() {
+            Object[] array = {
+                    name,
+                    category,
+                    artist_name,
+                    producer_name,
+                    producer_investment,
+                    worth,
+                    fare
+            };
+            return array;
     }
 }
