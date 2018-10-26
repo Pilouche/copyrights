@@ -7,6 +7,7 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.tuples.generated.Tuple9;
 import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Convert;
 
@@ -19,6 +20,7 @@ import java.awt.event.ItemListener;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Vector;
 
 public class App implements ItemListener {
 
@@ -80,6 +82,28 @@ public class App implements ItemListener {
             top_pane.add(deco_button, BorderLayout.EAST);
         }
         MAIN_CONTAINER.add(top_pane);
+    }
+
+    public static Vector<Artwork> getArtworks() {
+        Vector<Artwork> artworks = new Vector<>();
+        int count = 0;
+        System.out.println("Getting artwork count...");
+        try {
+            count = BLOCKCHAIN.getArtworksCount().send().intValue();
+            System.out.println("Artwork count is "+count);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        for (int i = 0; i < count; i++) {
+            System.out.println("Getting artwork "+(i+1));
+            try {
+                Tuple9 tuple = BLOCKCHAIN.getArtwork(BigInteger.valueOf(i)).send();
+                artworks.add(new Artwork(tuple.getValue1().toString(), tuple.getValue2().toString(), tuple.getValue3().toString(), tuple.getValue4().toString(), tuple.getValue5().toString(), tuple.getValue6().toString(), (BigInteger) tuple.getValue7(), (BigInteger) tuple.getValue8()));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return artworks;
     }
 
     private void setMainGUI() {

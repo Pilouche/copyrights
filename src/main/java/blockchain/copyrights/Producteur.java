@@ -5,11 +5,13 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigInteger;
+import java.util.Vector;
 
 public class Producteur extends JPanel {
 
-    private static int HEIGHT;
-    private static int WIDTH;
+    private int HEIGHT;
+    private int WIDTH;
+    private Vector<Artwork> ARTWORKS;
 
     public Producteur(int height, int width) {
         HEIGHT = height;
@@ -19,6 +21,7 @@ public class Producteur extends JPanel {
         tabbed_pane.addTab("New project", newProjectView());
         tabbed_pane.addTab("Buy projects", buyProjectView());
         this.add(tabbed_pane);
+        ARTWORKS = App.getArtworks();
     }
 
     private JPanel myProjectsView() {
@@ -38,21 +41,8 @@ public class Producteur extends JPanel {
         public ProjectsListener() {}
 
         public void actionPerformed(ActionEvent e) {
-            int count = 0;
-            System.out.println("Getting artwork count...");
-            try {
-                count = App.BLOCKCHAIN.getArtworksCount().send().intValue();
-                System.out.println("Artwork count is "+count);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-            for (int i = 0; i < count; i++) {
-                System.out.println("Getting artwork "+i);
-                try {
-                    System.out.println(App.BLOCKCHAIN.getArtwork(BigInteger.valueOf(i)).send());
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+            for (int i = 0; i < ARTWORKS.size(); i++) {
+                System.out.println(ARTWORKS.get(i));
             }
         }
     }
