@@ -35,7 +35,9 @@ pragma solidity ^0.4.25;
 			Producer producer;
         	uint worth;
         	uint fare;
-        	mapping (address => Investor) Investors;
+        	uint numInvestors;
+        	mapping (address => Investor) investors;
+        	mapping (uint => address) investorsIndex;
         	mapping (address => Client) Clients;
     	}
     	
@@ -43,40 +45,59 @@ pragma solidity ^0.4.25;
     	mapping (uint => Artwork) artworks;
     	
     	function newArtwork(string name, string category, address artistAddr, string artistName, address producerAddr,
-    	    string producerName, uint worth, uint fare) public returns (uint artworkID) {
+    	    string producerName, uint fare) public returns (uint artworkID) {
         	artworkID = numArtworks++;
-        	artworks[artworkID] = Artwork(name, category, Artist(artistAddr, artistName), Producer(producerAddr, producerName, 0), worth, fare);
+        	artworks[artworkID] = Artwork(name, category, Artist(artistAddr, artistName), Producer(producerAddr, producerName, 0), 0, 0, fare);
     	}
     	
     	function productionInvestment(uint artworkID) public payable {
     	    require(msg.value > 0);
+    	    if(artworks[artworkID].producer.investedAmount == 0) {
+    	        artworks[artworkID].worth = msg.value;
+    	    } else {
+    		    artworks[artworkID].worth += msg.value;
+    		}
     		artworks[artworkID].artist.addr.transfer(msg.value);
     		artworks[artworkID].producer.investedAmount += msg.value;
     	}
     	
     	function privateInvestment(uint artworkID) public payable {
     	    require(msg.value > 0);
-    		artworks[artworkID].artist.addr.transfer(msg.value);
-    	    if(!artworks[artworkID].Investors[msg.sender].exists)  {
-    		    artworks[artworkID].Investors[msg.sender] = Investor(msg.sender, msg.value, true);
+    	    if(!artworks[artworkID].investors[msg.sender].exists)  {
+    		    artworks[artworkID].investors[msg.sender] = Investor(msg.sender, msg.value, true);
+    		    artworks[artworkID].investorsIndex[artworks[artworkID].numInvestors++] = msg.sender;
     	    } else {
-    	        artworks[artworkID].Investors[msg.sender].investedAmount += msg.value;
+    	        artworks[artworkID].investors[msg.sender].investedAmount += msg.value;
     	    }
+    		artworks[artworkID].artist.addr.transfer(msg.value);
+    	    artworks[artworkID].worth += msg.value;
     	}
     	
     	function buyCopy(uint artworkID) public payable {
-    	    if(artworks[artworkID].Clients[msg.sender].exists) throw;
     		require(msg.value == artworks[artworkID].fare);
-    		artworks[artworkID].producer.addr.transfer(msg.value);
-    		artworks[artworkID].Clients[msg.sender] = Client(msg.sender, true);
+    		if(!artworks[artworkID].Clients[msg.sender].exists)  {
+    		    artworks[artworkID].Clients[msg.sender] = Client(msg.sender, true);
+                payShares(artworkID, artworks[artworkID].fare);  
+    	    } else {
+                return;
+    	    }  
     	}
     	
-    	function sellRights(uint artworkID, address producerAddr) public payable {
-    	    require(msg.value == artworks[artworkID].worth);
+    	function buyRights(uint artworkID, address producerAddr, string producerName) public payable {
+    	    require(msg.value > artworks[artworkID].producer.investedAmount);
+    	    uint oldAmount = artworks[artworkID].producer.investedAmount;
+    	    artworks[artworkID].producer = Producer(producerAddr, producerName, msg.value);
+    	    //update the worth as the redemption price is superior to the previous producer's investedAmount
+    	   artworks[artworkID].worth += msg.value-oldAmount;
     	}
     	
-    	function payShares() {
-    	    
+    	function payShares(uint artworkID, uint amountToDivide) {
+    	    //artworks[artworkID].artist.addr.transfer(amountToDivide*0.1);
+    	    //artworks[artworkID].producer.addr.transfer((amountToDivide*producer.investedAmount)/(artworks[artworkID]*0.9));
+    	    for(uint i=0; i<artworks[artworkID].numInvestors; i++)
+            {
+                artworks[artworkID].investors[artworks[artworkID].investorsIndex[i]].investedAmount;
+            }
     	}
     	
     	function getArtworksCount() public view returns(uint) {
@@ -84,7 +105,7 @@ pragma solidity ^0.4.25;
         }
     	
     	function getArtwork(uint index) public view returns(string, string, address, string, address, string, uint, uint, uint) {
-    	    Artwork artwork = artworks[index];
+    	    Artwork memory artwork = artworks[index];
             return (artwork.name, artwork.category, 
                 artwork.artist.addr, artwork.artist.name,
                 artwork.producer.addr, artwork.producer.name, artwork.producer.investedAmount,
