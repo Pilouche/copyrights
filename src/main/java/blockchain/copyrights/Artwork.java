@@ -43,4 +43,14 @@ public class Artwork {
                 +", Fare : "+fare;
         return s;
     }
+
+    public String resume() {
+        String s = "Name : "+name
+                +", Category : "+category
+                +", Artist name : "+artist_name
+                +", Producer name : "+producer_name
+                +", Total worth : "+worth
+                +", Fare : "+fare;
+        return s;
+    }
 }
