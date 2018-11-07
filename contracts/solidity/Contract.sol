@@ -50,15 +50,15 @@ pragma solidity ^0.4.25;
         	artworks[artworkID] = Artwork(name, category, Artist(artistAddr, artistName), Producer(producerAddr, producerName, 0), 0, 0, fare);
     	}
     	
-    	function productionInvestment(uint artworkID) public payable {
-    	    require(msg.value > 0);
+    	function productionInvestment(uint artworkID, uint amountToInvest) public payable {
+    	    require(amountToInvest > 0);
 //    	    if(artworks[artworkID].producer.investedAmount == 0) {
-//    	        artworks[artworkID].worth = msg.value;
+//    	        artworks[artworkID].worth = amountToInvest;
 //    	    } else {
-    		    artworks[artworkID].worth += msg.value;
+    		    artworks[artworkID].worth += amountToInvest;
 //    		}
-    		artworks[artworkID].artist.addr.transfer(msg.value);
-    		artworks[artworkID].producer.investedAmount += msg.value;
+    		artworks[artworkID].artist.addr.transfer(amountToInvest);
+    		artworks[artworkID].producer.investedAmount += amountToInvest;
     	}
     	
     	function privateInvestment(uint artworkID, uint amountToInvest) public payable {
@@ -85,11 +85,11 @@ pragma solidity ^0.4.25;
     	    }  
     	}
     	
-    	function buyRights(uint artworkID, address producerAddr, string producerName) public payable {
-    	    require(msg.value > artworks[artworkID].producer.investedAmount);
-    	    artworks[artworkID].producer = Producer(producerAddr, producerName, msg.value);
+    	function buyRights(uint artworkID, address producerAddr, string producerName, uint amountToInvest) public payable {
+    	    require(amountToInvest > artworks[artworkID].producer.investedAmount);
+    	    artworks[artworkID].producer = Producer(producerAddr, producerName, amountToInvest);
     	    //update the worth as the redemption price is superior to the previous producer's investedAmount
-    	    artworks[artworkID].worth = msg.value;
+    	    artworks[artworkID].worth = amountToInvest;
     	}
     	
     	function updateFare(uint artworkID, uint newFare) {
