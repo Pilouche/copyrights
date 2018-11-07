@@ -52,30 +52,32 @@ pragma solidity ^0.4.25;
     	
     	function productionInvestment(uint artworkID) public payable {
     	    require(msg.value > 0);
-    	    if(artworks[artworkID].producer.investedAmount == 0) {
-    	        artworks[artworkID].worth = msg.value;
-    	    } else {
+//    	    if(artworks[artworkID].producer.investedAmount == 0) {
+//    	        artworks[artworkID].worth = msg.value;
+//    	    } else {
     		    artworks[artworkID].worth += msg.value;
-    		}
+//    		}
     		artworks[artworkID].artist.addr.transfer(msg.value);
     		artworks[artworkID].producer.investedAmount += msg.value;
     	}
     	
-    	function privateInvestment(uint artworkID) public payable {
-    	    require(msg.value > 0);
+    	function privateInvestment(uint artworkID, uint amountToInvest) public payable {
+    	    require(amountToInvest > 0);
     	    if(!artworks[artworkID].investors[msg.sender].exists)  {
-    		    artworks[artworkID].investors[msg.sender] = Investor(msg.sender, msg.value, true);
+    	        //if the investor doesn't exist we create it
+    		    artworks[artworkID].investors[msg.sender] = Investor(msg.sender, amountToInvest, true);
     		    artworks[artworkID].investorsIndex[artworks[artworkID].numInvestors++] = msg.sender;
     	    } else {
-    	        artworks[artworkID].investors[msg.sender].investedAmount += msg.value;
+    	        artworks[artworkID].investors[msg.sender].investedAmount += amountToInvest;
     	    }
-    		artworks[artworkID].artist.addr.transfer(msg.value);
-    	    artworks[artworkID].worth += msg.value;
+    		artworks[artworkID].artist.addr.transfer(amountToInvest);
+    	    artworks[artworkID].worth += amountToInvest;
     	}
     	
     	function buyCopy(uint artworkID) public payable {
     		require(msg.value == artworks[artworkID].fare);
     		if(!artworks[artworkID].Clients[msg.sender].exists)  {
+    		    //if the client doesn't exist we create it
     		    artworks[artworkID].Clients[msg.sender] = Client(msg.sender, true);
                 payShares(artworkID, artworks[artworkID].fare);  
     	    } else {
@@ -85,10 +87,13 @@ pragma solidity ^0.4.25;
     	
     	function buyRights(uint artworkID, address producerAddr, string producerName) public payable {
     	    require(msg.value > artworks[artworkID].producer.investedAmount);
-    	    uint oldAmount = artworks[artworkID].producer.investedAmount;
     	    artworks[artworkID].producer = Producer(producerAddr, producerName, msg.value);
     	    //update the worth as the redemption price is superior to the previous producer's investedAmount
-    	   artworks[artworkID].worth += msg.value-oldAmount;
+    	    artworks[artworkID].worth = msg.value;
+    	}
+    	
+    	function updateFare(uint artworkID, uint newFare) {
+    	    artworks[artworkID].fare = newFare;
     	}
     	
     	function payShares(uint artworkID, uint amountToDivide) {
